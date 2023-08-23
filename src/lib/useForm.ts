@@ -18,6 +18,8 @@ import {
 } from '../utils'
 
 import type {
+  ChildForms,
+  CombineFormAndChildren,
   DeepPartial,
   Field,
   FieldArray,
@@ -29,8 +31,8 @@ import type {
 } from '../types'
 import { registerFieldWithDevTools, registerFormWithDevTools, unregisterFieldWithDevTools } from '../devtools/devtools'
 
-export default <T extends z.ZodType>(schema: T, initialData?: Partial<z.infer<T>>): UseForm<T> => {
-  const form = reactive<DeepPartial<z.infer<T>>>({} as any)
+export default <T extends z.ZodType, TChildren extends ChildForms>(schema: T, initialData?: Partial<z.infer<CombineFormAndChildren<T, TChildren>>>, children?: TChildren): UseForm<T, TChildren> => {
+  const form = reactive<DeepPartial<CombineFormAndChildren<T, TChildren>>>({} as any)
   const errors = ref<z.ZodFormattedError<T>>({} as any)
   const _id = generateId()
 
@@ -42,7 +44,7 @@ export default <T extends z.ZodType>(schema: T, initialData?: Partial<z.infer<T>
   if (initialData != null)
     Object.assign(form, JSON.parse(JSON.stringify(initialData)))
 
-  let onSubmitCb: UseForm<any>['onSubmitForm'] | null = null
+  let onSubmitCb: UseForm<any, any>['onSubmitForm'] | null = null
 
   const isValid = computed(() => {
     return Object.keys(errors.value).length === 0

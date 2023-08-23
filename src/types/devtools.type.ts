@@ -32,7 +32,7 @@ export type ObjectWithPossiblyFieldRecursive = ObjectWithPossiblyField & {
 
 export interface FormNode {
   type: 'form'
-  form: Form<any>
+  form: Form<any, any>
   name?: string
 }
 

@@ -146,21 +146,30 @@ export interface FieldArray<T extends any[]> {
 }
 
 export type Register<T extends z.ZodType> = <
-  P extends FieldPath<z.infer<T>>,
-  V extends FieldPathValue<z.infer<T>, P>,
-  K extends FieldPathValue<z.infer<T>, P> | undefined,
+  P extends FieldPath<z.infer<T>>, V extends FieldPathValue<z.infer<T>, P>, K extends FieldPathValue<z.infer<T>, P> | undefined,
 >(field: P, defaultValue?: K) => Field<V, K>
 
 export type RegisterArray<T extends z.ZodType> = <
-  P extends FieldPath<z.infer<T>>,
-  V extends FieldPathValue<z.infer<T>, P>,
+  P extends FieldPath<z.infer<T>>, V extends FieldPathValue<z.infer<T>, P>,
 >(field: P) => FieldArray<V>
 
 export type Unregister<T extends z.ZodType> = <
   P extends FieldPath<z.infer<T>>,
 >(field: P) => void
 
-export interface Form<T extends z.ZodType> {
+export type CombineFormAndChildren<T extends z.ZodType<any>, TChildren extends ChildForms> = z.ZodType<
+  T['_type'] & {
+    [K in keyof TChildren]: TChildren[K]['_type'];
+  }
+>
+
+export interface Form<T extends z.ZodType, TChildren extends ChildForms> {
+  // T extends z.ZodType, TChildren extends ChildForms
+
+  // T is a z.object and TChildren is a key value pair, of a string and z.object.
+  // Make a third generic type that combines the it into 1 z.object
+  // Eg. T = z.object({ name: z.string}) and children is z.object({ address: z.object({ street: z.string() }) })
+  // The combined type should be TCombined = z.object({ name: z.string }).and(z.object({ address: z.object({ street: z.string() }) }))
   /**
    * Internal id of the form, to track it in the devtools.
    */
@@ -168,11 +177,11 @@ export interface Form<T extends z.ZodType> {
   /**
    * The current state of the form.
    */
-  state: Readonly<DeepPartial<z.infer<T>>>
+  state: Readonly<DeepPartial<z.infer<CombineFormAndChildren<T, TChildren>>>>
   /**
    * The collection of all registered fields' errors.
    */
-  errors: z.ZodFormattedError<z.infer<T>>
+  errors: z.ZodFormattedError<z.infer<CombineFormAndChildren<T, TChildren>>>
   /**
    * Indicates whether the form is dirty or not.
    *
@@ -198,31 +207,31 @@ export interface Form<T extends z.ZodType> {
    *
    * @returns A `Field` instance that can be used to interact with the field.
    */
-  register: Register<T>
+  register: Register<CombineFormAndChildren<T, TChildren>>
   /**
    * Registers a new form field array.
    *
    * @returns A `FieldArray` instance that can be used to interact with the field array.
    */
-  registerArray: RegisterArray<T>
+  registerArray: RegisterArray<CombineFormAndChildren<T, TChildren>>
   /**
    * Unregisters a previously registered field.
    *
    * @param path The path of the field to unregister.
    */
-  unregister: Unregister<T>
+  unregister: Unregister<CombineFormAndChildren<T, TChildren>>
   /**
    * Sets errors in the form.
    *
    * @param errors The new errors for the form fields.
    */
-  addErrors: (errors: DeepPartial<z.ZodFormattedError<z.infer<T>>>) => void
+  addErrors: (errors: DeepPartial<z.ZodFormattedError<z.infer<CombineFormAndChildren<T, TChildren>>>>) => void
   /**
    * Sets values in the form.
    *
    * @param values The new values for the form fields.
    */
-  setValues: (values: DeepPartial<z.infer<T>>) => void
+  setValues: (values: DeepPartial<z.infer<CombineFormAndChildren<T, TChildren>>>) => void
   /**
    * Submits the form.
    *
@@ -231,19 +240,21 @@ export interface Form<T extends z.ZodType> {
   submit: () => Promise<void>
 }
 
+export type ChildForms = Record<string, z.ZodType<any>>
+
 /**
  * Represents a form instance.
  *
  * @typeparam T The type of the form schema.
  */
-export interface UseForm<T extends z.ZodType> {
+export interface UseForm<T extends z.ZodType, TChildren extends ChildForms> {
   /**
    * Called when the form is valid and submitted.
    * @param data The current form data.
    */
-  onSubmitForm: (cb: (data: z.infer<T>) => void) => void
+  onSubmitForm: (cb: (data: z.infer<CombineFormAndChildren<T, TChildren>>) => void) => void
   /**
    * The form instance itself.
    */
-  form: Form<T>
+  form: Form<T, TChildren>
 }
