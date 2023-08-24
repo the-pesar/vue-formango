@@ -157,11 +157,8 @@ export type Unregister<T extends z.ZodType> = <
   P extends FieldPath<z.infer<T>>,
 >(field: P) => void
 
-export type CombineFormAndChildren<T extends z.ZodType<any>, TChildren extends ChildForms> = z.ZodType<
-  T['_type'] & {
-    [K in keyof TChildren]: TChildren[K]['_type'];
-  }
->
+// @ts-expect-error Pretty sure this works but not rly sure but it does so
+export type CombineFormAndChildren<T extends z.ZodType<any>, TChildren extends ChildForms> = undefined extends TChildren ? T : z.ZodIntersection<T, z.ZodObject<TChildren>>
 
 export interface Form<T extends z.ZodType, TChildren extends ChildForms> {
   // T extends z.ZodType, TChildren extends ChildForms
@@ -240,7 +237,7 @@ export interface Form<T extends z.ZodType, TChildren extends ChildForms> {
   submit: () => Promise<void>
 }
 
-export type ChildForms = Record<string, z.ZodType<any>>
+export type ChildForms = Record<string, z.ZodType<any>> | undefined
 
 /**
  * Represents a form instance.
@@ -258,5 +255,36 @@ export interface UseForm<T extends z.ZodType, TChildren extends ChildForms> {
    */
   form: Form<T, TChildren>
 
-  childForms: Record<keyof TChildren, Form<TChildren[keyof TChildren], {}>>
+  childForms: Record<keyof TChildren, SubForm<TChildren[keyof TChildren]>>
+}
+
+export interface SubForm<T extends z.ZodType> {
+  /**
+   * The collection of all registered fields' errors.
+   */
+  errors: z.ZodFormattedError<z.infer<T>>
+  /**
+   * Indicates whether the form is currently valid or not.
+   *
+   * A form is considered valid if all of its fields are valid.
+   */
+  isValid: boolean
+  /**
+   * Registers a new form field.
+   *
+   * @returns A `Field` instance that can be used to interact with the field.
+   */
+  register: Register<T>
+  /**
+   * Registers a new form field array.
+   *
+   * @returns A `FieldArray` instance that can be used to interact with the field array.
+   */
+  registerArray: RegisterArray<T>
+  /**
+   * Unregisters a previously registered field.
+   *
+   * @param path The path of the field to unregister.
+   */
+  unregister: Unregister<T>
 }

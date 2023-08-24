@@ -34,7 +34,7 @@ import { registerFieldWithDevTools, registerFormWithDevTools, unregisterFieldWit
 import { createSubform } from './createSubform'
 
 export default <T extends z.ZodType, TChildren extends ChildForms>(schema: T, initialData?: Partial<z.infer<CombineFormAndChildren<T, TChildren>>>, children?: TChildren): UseForm<T, TChildren> => {
-  const combinedSchema = schema.and(z.object(children ?? {}))
+  const combinedSchema = children ? schema.and(z.object(children)) : schema
   const form = reactive<DeepPartial<CombineFormAndChildren<T, TChildren>>>({} as any)
   const errors = ref<z.ZodFormattedError<T>>({} as any)
   const _id = generateId()
