@@ -23,6 +23,7 @@ import type {
   DeepPartial,
   Field,
   FieldArray,
+  Form,
   Path,
   Register,
   RegisterArray,
@@ -30,8 +31,10 @@ import type {
   UseForm,
 } from '../types'
 import { registerFieldWithDevTools, registerFormWithDevTools, unregisterFieldWithDevTools } from '../devtools/devtools'
+import { createSubform } from './createSubform'
 
 export default <T extends z.ZodType, TChildren extends ChildForms>(schema: T, initialData?: Partial<z.infer<CombineFormAndChildren<T, TChildren>>>, children?: TChildren): UseForm<T, TChildren> => {
+  const combinedSchema = schema.and(z.object(children ?? {}))
   const form = reactive<DeepPartial<CombineFormAndChildren<T, TChildren>>>({} as any)
   const errors = ref<z.ZodFormattedError<T>>({} as any)
   const _id = generateId()
@@ -437,7 +440,7 @@ export default <T extends z.ZodType, TChildren extends ChildForms>(schema: T, in
     if (onSubmitCb == null)
       throw new Error('Attempted to submit form but `onSubmitForm` callback is not registered')
 
-    const customErrors = await onSubmitCb?.(schema.parse(form))
+    const customErrors = await onSubmitCb?.(combinedSchema.parse(form))
 
     if (errors.value != null)
       Object.assign(errors.value, customErrors)
@@ -455,7 +458,7 @@ export default <T extends z.ZodType, TChildren extends ChildForms>(schema: T, in
 
   watch(form, async () => {
     try {
-      await schema.parseAsync(form)
+      await combinedSchema.parseAsync(form)
 
       errors.value = {}
     }
@@ -484,11 +487,18 @@ export default <T extends z.ZodType, TChildren extends ChildForms>(schema: T, in
     addErrors,
   })
 
+  // make a key value pair of the children
+  // key stays the key, the value will be a return of the createSubform function and the value
+  const childForms = Object
+    .entries(children ?? {})
+    .reduce((child, [key, value]) => { return { [key]: createSubform(key, returnObject) } }, {}) as Record<keyof TChildren, Form<TChildren[keyof TChildren], {}>>
+
   if (process.env.NODE_ENV === 'development')
     registerFormWithDevTools(returnObject, getCurrentInstance()?.type.__name)
 
   return {
     onSubmitForm,
     form: returnObject,
+    childForms,
   }
 }

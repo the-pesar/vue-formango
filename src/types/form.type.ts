@@ -257,4 +257,6 @@ export interface UseForm<T extends z.ZodType, TChildren extends ChildForms> {
    * The form instance itself.
    */
   form: Form<T, TChildren>
+
+  childForms: Record<keyof TChildren, Form<TChildren[keyof TChildren], {}>>
 }
