@@ -14,7 +14,7 @@ import { buildFieldState, buildFormState } from './devtoolsBuilders'
 
 let API: DevtoolsPluginApi<Record<string, any>> | undefined
 const INSPECTOR_ID = 'formango-inspector'
-const DEVTOOLS_FORMS: Record<string, { name: string; form: Form<any> }> = {}
+const DEVTOOLS_FORMS: Record<string, { name: string; form: Form<any, any> }> = {}
 const DEVTOOLS_FIELDS: Record<string, { formId: string; field: Field<any, any> & { __ID__?: string } }> = {}
 
 const COLORS = {
@@ -217,7 +217,7 @@ const installPlugin = () => {
   }
 }
 
-export function registerFormWithDevTools(form: Form<any>, name?: string) {
+export function registerFormWithDevTools(form: Form<any, any>, name?: string) {
   installPlugin()
   if (!form?._id)
     return

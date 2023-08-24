@@ -280,9 +280,7 @@ type ExampleFieldArray = FieldArray<typeof exampleZodSchema>
  * @typeparam T The type of the form schema.
 */
 export type Register<T extends z.ZodType> = <
-  P extends FieldPath<z.infer<T>>,
-  V extends FieldPathValue<z.infer<T>, P>,
-  K extends FieldPathValue<z.infer<T>, P> | undefined,
+  P extends FieldPath<z.infer<T>>, V extends FieldPathValue<z.infer<T>, P>, K extends FieldPathValue<z.infer<T>, P> | undefined,
 >(field: P, defaultValue?: K) => Field<V, K>
 ```
 
@@ -301,8 +299,7 @@ type ExampleRegister = Register<typeof exampleZodSchema>
  * @typeparam T The type of the form schema.
 */
 export type RegisterArray<T extends z.ZodType> = <
-  P extends FieldPath<z.infer<T>>,
-  V extends FieldPathValue<z.infer<T>, P>,
+  P extends FieldPath<z.infer<T>>, V extends FieldPathValue<z.infer<T>, P>,
 >(field: P) => FieldArray<V>
 ```
 

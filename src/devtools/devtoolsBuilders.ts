@@ -1,6 +1,6 @@
 import type { Field, Form } from '../types'
 
-export function buildFormState(form: Form<any>) {
+export function buildFormState(form: Form<any, any>) {
   return {
     'Form state': [
       {

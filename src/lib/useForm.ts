@@ -491,7 +491,7 @@ export default <T extends z.ZodType, TChildren extends ChildForms>(schema: T, in
   // key stays the key, the value will be a return of the createSubform function and the value
   const childForms = Object
     .entries(children ?? {})
-    .reduce((child, [key, value]) => { return { [key]: createSubform(key, returnObject) } }, {}) as Record<keyof TChildren, Form<TChildren[keyof TChildren], {}>>
+    .reduce((child, [key]) => { return { [key]: createSubform(key, returnObject) } }, {}) as Record<keyof TChildren, Form<TChildren[keyof TChildren], {}>>
 
   if (process.env.NODE_ENV === 'development')
     registerFormWithDevTools(returnObject, getCurrentInstance()?.type.__name)

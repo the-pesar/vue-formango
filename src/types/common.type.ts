@@ -98,8 +98,7 @@ type AppendNonBlankKey<PT extends PathTuple, K extends Key> = K extends ''
  *                 the original {@link PathString} already
  */
 type SplitPathStringImpl<
-  PS extends PathString,
-  PT extends PathTuple,
+  PS extends PathString, PT extends PathTuple,
 > = PS extends `${infer K}.${infer R}`
   ? SplitPathStringImpl<R, AppendNonBlankKey<PT, K>>
   : AppendNonBlankKey<PT, PS>
@@ -127,8 +126,7 @@ export type SplitPathString<PS extends PathString> = SplitPathStringImpl<
  * @typeParam PS - accumulator of the already joined {@link Key}s
  */
 type JoinPathTupleImpl<
-  PT extends PathTuple,
-  PS extends PathString,
+  PT extends PathTuple, PS extends PathString,
 > = PT extends [infer K, ...infer R]
   ? JoinPathTupleImpl<AsPathTuple<R>, `${PS}.${AsKey<K>}`>
   : PS
@@ -191,8 +189,7 @@ type TryAccess<T, K> = K extends keyof T
  * ```
  */
 type TryAccessArray<
-  T extends readonly any[],
-  K extends Key,
+  T extends readonly any[], K extends Key,
 > = K extends `${ArrayKey}` ? T[number] : TryAccess<T, K>
 
 /**
@@ -383,9 +380,7 @@ export type HasKey<T, K extends Key> = IsNever<Exclude<K, Keys<T>>>
  *                  confirmed to exist already
  */
 type ValidPathPrefixImpl<
-  T,
-  PT extends PathTuple,
-  VPT extends PathTuple,
+  T, PT extends PathTuple, VPT extends PathTuple,
 > = PT extends [infer K, ...infer R]
   ? HasKey<T, AsKey<K>> extends true
     ? ValidPathPrefixImpl<

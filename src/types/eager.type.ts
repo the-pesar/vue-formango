@@ -172,16 +172,14 @@ export type PathValue<T, P extends Path<T> | ArrayPath<T>> = T extends any
  * See {@link PathValue}
  */
 export type FieldPathValue<
-  TFieldValues extends FieldValues,
-  TFieldPath extends FieldPath<TFieldValues>,
+  TFieldValues extends FieldValues, TFieldPath extends FieldPath<TFieldValues>,
 > = PathValue<TFieldValues, TFieldPath>
 
 /**
  * See {@link PathValue}
  */
 export type FieldArrayPathValue<
-  TFieldValues extends FieldValues,
-  TFieldArrayPath extends FieldArrayPath<TFieldValues>,
+  TFieldValues extends FieldValues, TFieldArrayPath extends FieldArrayPath<TFieldValues>,
 > = PathValue<TFieldValues, TFieldArrayPath>
 
 /**
@@ -195,8 +193,7 @@ export type FieldArrayPathValue<
  * ```
  */
 export type FieldPathValues<
-  TFieldValues extends FieldValues,
-  TPath extends Array<FieldPath<TFieldValues>> | ReadonlyArray<FieldPath<TFieldValues>>,
+  TFieldValues extends FieldValues, TPath extends Array<FieldPath<TFieldValues>> | ReadonlyArray<FieldPath<TFieldValues>>,
 > = {} & {
   [K in keyof TPath]: FieldPathValue<
     TFieldValues,
