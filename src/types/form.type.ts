@@ -6,17 +6,19 @@ export type MaybePromise<T> = T | Promise<T>
 
 type ArrayElement<ArrayType extends any[]> =
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never
+type ConcatWithDot<Str1 extends string | undefined, Str2 extends string | undefined> =
+  Str1 extends undefined ? (Str2 extends undefined ? '' : Str2) : Str2 extends undefined ? Str1 : `${Str1}.${Str2}`
 
 /**
  * Represents a form field.
  *
  * @typeparam T The type of the field value.
  */
-export interface Field<T, K> {
+export interface Field<T, K, TParentZod extends z.ZodType, TPath extends FieldPath<z.infer<TParentZod>> | undefined> {
   /**
    * The current path of the field. This can change if fields are unregistered.
    */
-  _path: string | null
+  _path: TPath | null
   /**
    * The unique id of the field.
    */
@@ -69,6 +71,12 @@ export interface Field<T, K> {
    * Called when the field input value is changed.
    */
   onChange: () => void
+  /**
+   * Registers a new form field.
+   *
+   * @returns A `Field` instance that can be used to interact with the field.
+   */
+  register: RegisterFromField<TParentZod, TPath>
 }
 
 /**
@@ -145,11 +153,34 @@ export interface FieldArray<T extends any[]> {
   setValue: (value: T) => void
 }
 
+// Make a RegisterFromField type, which works the same as the Register function, except it also takes a generic base path, which can be for example 'address' or 'address.street'
+// This way, we can use the same register function for both the form and the field, and the base path will be prepended to the field path.
+// The field value in the registerFromField is then all the types from the base path to the field path, and the field path value is the type of the field itself.
+
+type ExtractMatchingKeys<Prefix extends string | undefined, Keys extends string> =
+  Prefix extends undefined ? Keys : Keys extends `${Prefix}.${infer Rest}`
+    ? Rest
+    : never
+
+export type RegisterFromField<
+  T extends z.ZodType,
+  BasePath extends FieldPath<z.infer<T>> | undefined,
+> = <
+  P extends FieldPath<z.infer<T>>,
+  V extends FieldPathValue<z.infer<T>, P>,
+  K extends FieldPathValue<z.infer<T>, P> | undefined,
+  TTrimmed extends ExtractMatchingKeys<BasePath, P>,
+  TFullPath extends FieldPath<z.infer<T>> & ConcatWithDot<BasePath, TTrimmed>,
+>(
+  field: TTrimmed,
+  defaultValue?: K,
+) => Field<V, K, T, TFullPath>
+
 export type Register<T extends z.ZodType> = <
   P extends FieldPath<z.infer<T>>,
   V extends FieldPathValue<z.infer<T>, P>,
   K extends FieldPathValue<z.infer<T>, P> | undefined,
->(field: P, defaultValue?: K) => Field<V, K>
+>(field: P, defaultValue?: K) => Field<V, K, T, P>
 
 export type RegisterArray<T extends z.ZodType> = <
   P extends FieldPath<z.infer<T>>,
