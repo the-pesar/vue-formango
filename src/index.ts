@@ -8,7 +8,6 @@ export type { UseForm, Field, FieldArray, Form } from './types'
 //   stuff: z.object({
 //     thing: z.string(),
 //   }),
-
 // })
 
 // const zodType = z.object({
@@ -19,7 +18,10 @@ export type { UseForm, Field, FieldArray, Form } from './types'
 // const { form } = useForm(zodType)
 
 // const addressForm = form.register('address.stuff')
-// addressForm.register('thing')
+// addressForm.modelValue = {
+//   thing: 'test',
+// }
+// const thing = addressForm.register('thing')
 
-// const test = {} as unknown as Field<z.infer<typeof address>, {}, typeof address, undefined>
+// const test = {} as unknown as Field<z.infer<typeof address>, undefined, typeof address, undefined>
 // test.register('stuff.thing')
